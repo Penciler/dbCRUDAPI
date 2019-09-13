@@ -16,13 +16,18 @@ type (
   Name     string `json:"name"`
   Email    string    `json:"email"`
  }
+
+ model interface {
+ 	create(c *gin.Context) (err error)
+ }
 )
 
 func main(){
+	var user userModel
 	router := gin.Default()
 	v1 := router.Group("api/vi/users")
 	{
-	  v1.POST("/", createUser)
+	  v1.POST("/", createUser(user))
 	  /*
 	  v1.GET("/", fetchAllUser)
 	  v1.GET("/:id", fetchSingleUser)
@@ -34,19 +39,46 @@ func main(){
 	router.Run()
 }
 
-func init(){
-	var err error
-	db, err = gorm.Open("mysql","root:password@tcp(127.0.0.1:8081)/mysql?charset=utf8&parseTime=True&loc=Local")
+func initDB(dbType string, args string) (err error) {
+	//db, err = gorm.Open("mysql","root:password@tcp(127.0.0.1:8081)/mysql?charset=utf8&parseTime=True&loc=Local")
+	db, err = gorm.Open(dbType,args)
 	if err != nil {
 		panic("failed to connect database")
 		println(err)
+		return err
 	}
 	db.AutoMigrate(&userModel{})
+	return nil
+}
+
+func (user userModel) create(c *gin.Context) (err error){
+      if err1 := c.BindJSON(&user); err1 != nil {
+          return err1
+      }
+      if err2 := db.Save(&user); err2.Error != nil {
+      	  return err2.Error
+      }
+      return nil
 }
 
 // createTodo add a new todo
-func createUser(c *gin.Context) {
- user := userModel{Name: c.PostForm("name"), Email: c.PostForm("email")}
- db.Save(&user)
+/*
+func createUser(c *gin.Context, user model) {
+ if err := user.saveData(c); err != nil {
+ 	c.JSON(http.StatusCreated, gin.H{"status": http.StatusInternalServerError, "message": "User not created!"})
+ }
  c.JSON(http.StatusCreated, gin.H{"status": http.StatusCreated, "message": "User created successfully!", "resourceId": user.ID})
+}
+*/
+
+// createTodo add a new todo
+func createUser(user model) gin.HandlerFunc {
+	return func(c *gin.Context){ 
+		if err := user.create(c); err != nil {
+ 			c.JSON(http.StatusCreated, gin.H{"status": http.StatusInternalServerError, "message": "User not created!"})
+ 		}
+ 		//c.JSON(http.StatusCreated, gin.H{"status": http.StatusCreated, "message": "User created successfully!", "resourceId": user.ID})
+ 		c.JSON(http.StatusCreated, gin.H{"status": http.StatusCreated, "message": "User created successfully!"})
+ 	}
+
 }

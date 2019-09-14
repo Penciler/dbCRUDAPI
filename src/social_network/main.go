@@ -13,13 +13,15 @@ type (
  // userModel describes user data
  userModel struct {
   gorm.Model
+  ID        uint   `gorm:"primary_key;AUTO_INCREMENT"`
   Name     string `json:"name"`
   Email    string    `json:"email"`
  }
 
  model interface {
- 	create(c *gin.Context) (err error)
+ 	create(c *gin.Context) (returnUser userModel, err error)
  }
+
 )
 
 func main(){
@@ -51,14 +53,14 @@ func initDB(dbType string, args string) (err error) {
 	return nil
 }
 
-func (user userModel) create(c *gin.Context) (err error){
+func (user userModel) create(c *gin.Context) (returnUser userModel, err error){
       if err1 := c.BindJSON(&user); err1 != nil {
-          return err1
+          return user, err1
       }
       if err2 := db.Save(&user); err2.Error != nil {
-      	  return err2.Error
+      	  return user, err2.Error
       }
-      return nil
+      return user, nil
 }
 
 // createTodo add a new todo
@@ -73,12 +75,13 @@ func createUser(c *gin.Context, user model) {
 
 // createTodo add a new todo
 func createUser(user model) gin.HandlerFunc {
-	return func(c *gin.Context){ 
-		if err := user.create(c); err != nil {
+	return func(c *gin.Context){
+		returnUser, err := user.create(c) 
+		if err != nil {
  			c.JSON(http.StatusCreated, gin.H{"status": http.StatusInternalServerError, "message": "User not created!"})
  		}
  		//c.JSON(http.StatusCreated, gin.H{"status": http.StatusCreated, "message": "User created successfully!", "resourceId": user.ID})
- 		c.JSON(http.StatusCreated, gin.H{"status": http.StatusCreated, "message": "User created successfully!"})
+ 		c.JSON(http.StatusCreated, gin.H{"status": http.StatusCreated, "message": "User created successfully!", "resourceId": returnUser.ID})
  	}
 
 }

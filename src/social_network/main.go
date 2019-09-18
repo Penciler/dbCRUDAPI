@@ -26,7 +26,13 @@ type (
 
 func main(){
 	var user userModel
-	router := gin.Default()
+	router := setRoute(user)
+
+	router.Run()
+}
+
+func setRoute(user model) (router *gin.Engine) {
+	router = gin.Default()
 	v1 := router.Group("api/vi/users")
 	{
 	  v1.POST("/", createUser(user))
@@ -37,8 +43,7 @@ func main(){
 	  v1.DELETE("/:id", deleteUser)
 	  */
 	}
-
-	router.Run()
+	return router
 }
 
 func initDB(dbType string, args string) (err error) {
@@ -62,16 +67,6 @@ func (user userModel) create(c *gin.Context) (returnUser userModel, err error){
       }
       return user, nil
 }
-
-// createTodo add a new todo
-/*
-func createUser(c *gin.Context, user model) {
- if err := user.saveData(c); err != nil {
- 	c.JSON(http.StatusCreated, gin.H{"status": http.StatusInternalServerError, "message": "User not created!"})
- }
- c.JSON(http.StatusCreated, gin.H{"status": http.StatusCreated, "message": "User created successfully!", "resourceId": user.ID})
-}
-*/
 
 // createTodo add a new todo
 func createUser(user model) gin.HandlerFunc {

@@ -8,6 +8,13 @@ import (
 	"bytes"
 )
 
+type (
+	testUserModel struct {
+		ID        uint
+	}
+)
+
+
 func TestInitDB(t *testing.T){
 	err := initDB("mysql", "root:password@tcp(127.0.0.1:8081)/mysql?charset=utf8&parseTime=True&loc=Local")
 	if err != nil{
@@ -46,4 +53,25 @@ func TestCreate(t *testing.T){
 		t.Errorf("Create user fail, expect %v got %v",returnUser, resultUser)
 	}
 	*/
+}
+
+func (user testUserModel) create(c *gin.Context) (returnUser userModel, err error){
+	returnUser.ID = 1
+    return returnUser, nil
+}
+
+func performRequest(r http.Handler, method, path string) *httptest.ResponseRecorder {
+   req, _ := http.NewRequest(method, path, nil)
+   w := httptest.NewRecorder()
+   r.ServeHTTP(w, req)
+   return w
+}
+
+func TestCreateUser(t *testing.T){
+	var testUser testUserModel
+	router := setRoute(testUser)
+	w := performRequest(router, "POST", "api/vi/users/")
+	if status := w.Code; status != http.StatusCreated {
+		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusCreated)
+	}
 }

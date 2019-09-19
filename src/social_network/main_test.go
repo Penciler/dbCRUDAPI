@@ -55,8 +55,27 @@ func TestCreate(t *testing.T){
 	*/
 }
 
+func TestRead(t *testing.T){
+	initDB("mysql", "root:password@tcp(127.0.0.1:8081)/mysql?charset=utf8&parseTime=True&loc=Local")
+	var testUser userModel
+	var id = "4"
+	resultUser, err2 := testUser.read(id)
+	//println(returnUser)
+	if err2 != nil{
+			t.Errorf("Read user fail, expect nil got %v",err2)
+	}
+
+	if resultUser.Name == "" || resultUser.Email == "" {
+		t.Errorf("Read user fail, expect Name and Email got nothing, resultUser: %v", resultUser)
+	}		
+}
+
 func (user testUserModel) create(c *gin.Context) (returnUser userModel, err error){
 	returnUser.ID = 1
+    return returnUser, nil
+}
+
+func (user testUserModel) read(id string) (returnUser userModel, err error){
     return returnUser, nil
 }
 

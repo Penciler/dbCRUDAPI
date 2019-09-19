@@ -18,8 +18,15 @@ type (
   Email    string    `json:"email"`
  }
 
+ userRes struct {
+  ID        uint   `gorm:"primary_key;AUTO_INCREMENT"`
+  Name     string `json:"name"`
+  Email    string    `json:"email"`
+ }
+
  model interface {
  	create(c *gin.Context) (returnUser userModel, err error)
+ 	read(id string) (returnUser userModel, err error)
  }
 
 )
@@ -36,10 +43,10 @@ func setRoute(user model) (router *gin.Engine) {
 	v1 := router.Group("api/vi/users")
 	{
 	  v1.POST("/", createUser(user))
+	  v1.GET("/:id", getSingleUser(user))
 	  /*
 	  v1.GET("/", fetchAllUser)
-	  v1.GET("/:id", fetchSingleUser)
-	  v1.PUT("/:id", updateUser)
+	  v1.PATCH("/:id", updateUser)
 	  v1.DELETE("/:id", deleteUser)
 	  */
 	}
@@ -68,7 +75,14 @@ func (user userModel) create(c *gin.Context) (returnUser userModel, err error){
       return user, nil
 }
 
-// createTodo add a new todo
+func (user userModel) read(id string) (returnUser userModel, err error){
+      if err := db.First(&user, id); err.Error != nil {
+      	  return user, err.Error
+      }
+      return user, nil
+}
+
+// create user
 func createUser(user model) gin.HandlerFunc {
 	return func(c *gin.Context){
 		returnUser, err := user.create(c) 
@@ -77,6 +91,21 @@ func createUser(user model) gin.HandlerFunc {
  		}
  		//c.JSON(http.StatusCreated, gin.H{"status": http.StatusCreated, "message": "User created successfully!", "resourceId": user.ID})
  		c.JSON(http.StatusCreated, gin.H{"status": http.StatusCreated, "message": "User created successfully!", "resourceId": returnUser.ID})
+ 	}
+
+}
+
+// get single user data
+func getSingleUser(user model) gin.HandlerFunc {
+	return func(c *gin.Context){
+		id := c.Param("id")
+		returnUser, err := user.read(id) 
+		if err != nil {
+ 			c.JSON(http.StatusInternalServerError, gin.H{"status": http.StatusInternalServerError, "message": "User not read!"})
+ 		}
+ 		userData := userRes{ID: returnUser.ID, Name: returnUser.Name, Email: returnUser.Email}
+
+ 		c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "data": userData})
  	}
 
 }

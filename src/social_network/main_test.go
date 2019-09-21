@@ -115,6 +115,11 @@ func (user testUserModel) read(id string) (returnUser userModel, err error){
     return returnUser, nil
 }
 
+func (user testUserModel) update(id string, c *gin.Context) (returnUser userModel, err error){
+	returnUser.ID = "2"
+    return returnUser, nil
+}
+
 func performRequest(r http.Handler, method, path string) *httptest.ResponseRecorder {
    req, _ := http.NewRequest(method, path, nil)
    w := httptest.NewRecorder()
@@ -144,5 +149,14 @@ func TestGetSingleUser(t *testing.T){
 	// need implement better response check in the future
 	if result != chk {
 		t.Errorf("handler returned wrong data: got %v want %v", result, chk)
+	}
+}
+
+func TestUpdateUser(t *testing.T){
+	var testUser testUserModel
+	router := setRoute(testUser)
+	w := performRequest(router, "PATCH", "api/vi/users/2")
+	if status := w.Code; status != http.StatusOK {
+		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 	}
 }

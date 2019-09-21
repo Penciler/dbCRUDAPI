@@ -29,6 +29,7 @@ type (
  model interface {
  	create(c *gin.Context) (returnUser userModel, err error)
  	read(id string) (returnUser userModel, err error)
+ 	update(id string, c *gin.Context) (returnUser userModel, err error)
  }
 
 )
@@ -46,9 +47,9 @@ func setRoute(user model) (router *gin.Engine) {
 	{
 	  v1.POST("/", createUser(user))
 	  v1.GET("/:id", getSingleUser(user))
+	  v1.PATCH("/:id", updateUser(user))
 	  /*
 	  v1.GET("/", fetchAllUser)
-	  v1.PATCH("/:id", updateUser)
 	  v1.DELETE("/:id", deleteUser)
 	  */
 	}
@@ -123,6 +124,20 @@ func getSingleUser(user model) gin.HandlerFunc {
  		userData := userRes{ID: returnUser.ID, Name: returnUser.Name, Email: returnUser.Email}
 
  		c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "data": userData})
+ 	}
+
+}
+
+// update user data
+func updateUser(user model) gin.HandlerFunc {
+	return func(c *gin.Context){
+		id := c.Param("id")
+		returnUser, err := user.update(id, c) 
+		if err != nil {
+ 			c.JSON(http.StatusInternalServerError, gin.H{"status": http.StatusInternalServerError, "message": "User not update!"})
+ 		}
+
+ 		c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "message": "User updated successfully!", "resourceId": returnUser.ID})
  	}
 
 }

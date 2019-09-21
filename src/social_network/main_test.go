@@ -6,11 +6,14 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"bytes"
+	"io/ioutil"
 )
 
 type (
 	testUserModel struct {
 		ID        uint
+		Name     string `json:"name"`
+  		Email    string    `json:"email"`
 	}
 )
 
@@ -76,6 +79,8 @@ func (user testUserModel) create(c *gin.Context) (returnUser userModel, err erro
 }
 
 func (user testUserModel) read(id string) (returnUser userModel, err error){
+	returnUser.Name = "testName"
+	returnUser.Email = "testEmail"
     return returnUser, nil
 }
 
@@ -92,5 +97,21 @@ func TestCreateUser(t *testing.T){
 	w := performRequest(router, "POST", "api/vi/users/")
 	if status := w.Code; status != http.StatusCreated {
 		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusCreated)
+	}
+}
+
+func TestGetSingleUser(t *testing.T){
+	var testUser testUserModel
+	router := setRoute(testUser)
+	w := performRequest(router, "GET", "api/vi/users/1")
+	body, _ := ioutil.ReadAll(w.Body)
+	result := string(body)
+	var chk = "{\"data\":{\"ID\":0,\"name\":\"testName\",\"email\":\"testEmail\"},\"status\":200}\n"
+	if status := w.Code; status != http.StatusOK {
+		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
+	}
+	// need implement better response check in the future
+	if result != chk {
+		t.Errorf("handler returned wrong data: got %v want %v", result, chk)
 	}
 }

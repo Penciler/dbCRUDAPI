@@ -73,8 +73,39 @@ func TestRead(t *testing.T){
 	}		
 }
 
+func TestUpdate(t *testing.T){
+	initDB("mysql", "root:password@tcp(127.0.0.1:8081)/mysql?charset=utf8&parseTime=True&loc=Local")
+	var testData = []byte( `{"name":"updateName1", "email":"email1@mail.com"}`)
+	var testUser userModel
+	//var resultUser userModel
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	//create new request
+	req, err1 := http.NewRequest("", "", bytes.NewBuffer(testData))
+	if err1 != nil {
+		t.Fatal(err1)
+	}
+	//add request to context
+	c.Request = req
+
+	_, err2 := testUser.update("2",c)
+	if err2 != nil{
+			t.Errorf("Update user fail, expect nil got %v",err2)
+	}	
+
+	//read from db & compare
+	/*
+	db.First(&resultUser, returnUser.ID)
+	t.Errorf("Create user fail, expect %v got %v",returnUser, resultUser)
+	if testUser != resultUser {
+		t.Errorf("Create user fail, expect %v got %v",returnUser, resultUser)
+	}
+	*/
+}
+
 func (user testUserModel) create(c *gin.Context) (returnUser userModel, err error){
-	returnUser.ID = 1
+	returnUser.ID = "1"
     return returnUser, nil
 }
 
@@ -106,7 +137,7 @@ func TestGetSingleUser(t *testing.T){
 	w := performRequest(router, "GET", "api/vi/users/1")
 	body, _ := ioutil.ReadAll(w.Body)
 	result := string(body)
-	var chk = "{\"data\":{\"ID\":0,\"name\":\"testName\",\"email\":\"testEmail\"},\"status\":200}\n"
+	var chk = "{\"data\":{\"ID\":\"\",\"name\":\"testName\",\"email\":\"testEmail\"},\"status\":200}\n"
 	if status := w.Code; status != http.StatusOK {
 		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 	}

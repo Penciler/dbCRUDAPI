@@ -13,13 +13,15 @@ type (
  // userModel describes user data
  userModel struct {
   gorm.Model
-  ID        uint   `gorm:"primary_key;AUTO_INCREMENT"`
+  //ID        uint   `gorm:"primary_key;AUTO_INCREMENT"`
+  ID        string   `gorm:"primary_key;AUTO_INCREMENT"`
   Name     string `json:"name"`
   Email    string    `json:"email"`
  }
 
  userRes struct {
-  ID        uint   `gorm:"primary_key;AUTO_INCREMENT"`
+  //ID        uint   `gorm:"primary_key;AUTO_INCREMENT"`
+  ID        string   `gorm:"primary_key;AUTO_INCREMENT"`
   Name     string `json:"name"`
   Email    string    `json:"email"`
  }
@@ -78,6 +80,21 @@ func (user userModel) create(c *gin.Context) (returnUser userModel, err error){
 func (user userModel) read(id string) (returnUser userModel, err error){
       if err := db.First(&user, id); err.Error != nil {
       	  return user, err.Error
+      }
+      return user, nil
+}
+
+func (user userModel) update(id string, c *gin.Context) (returnUser userModel, err error){
+	  var temp userModel
+      if err1 := db.First(&user, id); err1.Error != nil {
+      	  return user, err1.Error
+      }
+      if err2 := c.BindJSON(&temp); err2 != nil {
+          return user, err2
+      }
+      user.ID = id
+      if err3 := db.Model(&user).Update("Name", temp.Name, "Email", temp.Email); err3.Error != nil {
+      	  return user, err3.Error
       }
       return user, nil
 }

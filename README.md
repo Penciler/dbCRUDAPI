@@ -82,3 +82,26 @@ PATCH
 **Error Reponse:**  
 - Code: 500  
 - Content:`{"message": "User not update!"} ` 
+
+## Delete User
+
+**URL:**  
+`api/vi/users/:id/  `
+
+**Method:**  
+DELETE  
+
+**URL Params:**  
+- Required: 
+`id=[integer]`  
+
+**Data Params:**  
+None
+
+**Success Response:**  
+- Code: 200  
+- Content:`{"message": "User deleted successfully!"} `
+
+**Error Reponse:**  
+- Code: 500  
+- Content:`{"message": "User not delete!"} ` 

@@ -104,6 +104,16 @@ func TestUpdate(t *testing.T){
 	*/
 }
 
+func TestDelete(t *testing.T){
+	initDB("mysql", "root:password@tcp(127.0.0.1:8081)/mysql?charset=utf8&parseTime=True&loc=Local")
+	var testUser userModel
+	var id = "3"
+	err2 := testUser.delete(id)
+	if err2 != nil{
+			t.Errorf("Delete user fail, expect nil got %v",err2)
+	}		
+}
+
 func (user testUserModel) create(c *gin.Context) (returnUser userModel, err error){
 	returnUser.ID = "1"
     return returnUser, nil

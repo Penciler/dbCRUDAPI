@@ -100,6 +100,17 @@ func (user userModel) update(id string, c *gin.Context) (returnUser userModel, e
       return user, nil
 }
 
+func (user userModel) delete(id string) (err error){
+      if err1 := db.First(&user, id); err1.Error != nil {
+      	  return err1.Error
+      }
+      user.ID = id
+      if err2 := db.Delete(&user); err2.Error != nil {
+      	  return err2.Error
+      }
+      return nil
+}
+
 // create user
 func createUser(user model) gin.HandlerFunc {
 	return func(c *gin.Context){

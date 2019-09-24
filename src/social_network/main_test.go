@@ -130,6 +130,10 @@ func (user testUserModel) update(id string, c *gin.Context) (returnUser userMode
     return returnUser, nil
 }
 
+func (user testUserModel) delete(id string) (err error){
+    return nil
+}
+
 func performRequest(r http.Handler, method, path string) *httptest.ResponseRecorder {
    req, _ := http.NewRequest(method, path, nil)
    w := httptest.NewRecorder()
@@ -166,6 +170,15 @@ func TestUpdateUser(t *testing.T){
 	var testUser testUserModel
 	router := setRoute(testUser)
 	w := performRequest(router, "PATCH", "api/vi/users/2")
+	if status := w.Code; status != http.StatusOK {
+		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
+	}
+}
+
+func TestDeleteUser(t *testing.T){
+	var testUser testUserModel
+	router := setRoute(testUser)
+	w := performRequest(router, "DELETE", "api/vi/users/7")
 	if status := w.Code; status != http.StatusOK {
 		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 	}

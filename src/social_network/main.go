@@ -30,6 +30,7 @@ type (
  	create(c *gin.Context) (returnUser userModel, err error)
  	read(id string) (returnUser userModel, err error)
  	update(id string, c *gin.Context) (returnUser userModel, err error)
+ 	delete(id string) (err error)
  }
 
 )
@@ -48,9 +49,9 @@ func setRoute(user model) (router *gin.Engine) {
 	  v1.POST("/", createUser(user))
 	  v1.GET("/:id", getSingleUser(user))
 	  v1.PATCH("/:id", updateUser(user))
+	  v1.DELETE("/:id", deleteUser(user))
 	  /*
 	  v1.GET("/", fetchAllUser)
-	  v1.DELETE("/:id", deleteUser)
 	  */
 	}
 	return router
@@ -149,6 +150,20 @@ func updateUser(user model) gin.HandlerFunc {
  		}
 
  		c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "message": "User updated successfully!", "resourceId": returnUser.ID})
+ 	}
+
+}
+
+// delete user data
+func deleteUser(user model) gin.HandlerFunc {
+	return func(c *gin.Context){
+		id := c.Param("id")
+		err := user.delete(id) 
+		if err != nil {
+ 			c.JSON(http.StatusInternalServerError, gin.H{"status": http.StatusInternalServerError, "message": "User not delete!"})
+ 		}
+
+ 		c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "message": "User deleted successfully!" })
  	}
 
 }
